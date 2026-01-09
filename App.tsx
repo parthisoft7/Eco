@@ -34,6 +34,13 @@ import AdminDashboard from './pages/Admin/AdminDashboard';
 import AdminProducts from './pages/Admin/AdminProducts';
 import AdminOrders from './pages/Admin/AdminOrders';
 import AdminUsers from './pages/Admin/AdminUsers';
+
+// Policy Pages
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
+import RefundPage from './pages/RefundPage';
+import ShippingPage from './pages/ShippingPage';
+
 import { auth } from './firebase';
 import { signOut } from 'firebase/auth';
 
@@ -167,6 +174,15 @@ const Footer = () => {
           </ul>
         </div>
         <div>
+          <h4 className="text-lg font-semibold text-white mb-4">Legal & Policies</h4>
+          <ul className="space-y-2 text-sm">
+            <li><Link to="/privacy-policy" className="hover:text-emerald-400">Privacy Policy</Link></li>
+            <li><Link to="/terms-and-conditions" className="hover:text-emerald-400">Terms & Conditions</Link></li>
+            <li><Link to="/refund-policy" className="hover:text-emerald-400">Refund Policy</Link></li>
+            <li><Link to="/shipping-policy" className="hover:text-emerald-400">Shipping Policy</Link></li>
+          </ul>
+        </div>
+        <div>
           <h4 className="text-lg font-semibold text-white mb-4">Contact Info</h4>
           <ul className="space-y-2 text-sm">
             <li className="flex items-start space-x-2">
@@ -182,11 +198,6 @@ const Footer = () => {
               <span>support@mudichurmart.com</span>
             </li>
           </ul>
-        </div>
-        <div>
-          <h4 className="text-lg font-semibold text-white mb-4">Business Hours</h4>
-          <p className="text-sm">Mon - Sat: 9:00 AM - 9:00 PM</p>
-          <p className="text-sm">Sunday: 10:00 AM - 6:00 PM</p>
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-8 border-t border-gray-800 text-center text-xs">
@@ -234,6 +245,12 @@ const App: React.FC = () => {
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
+                
+                {/* Policies Routes */}
+                <Route path="/privacy-policy" element={<PrivacyPage />} />
+                <Route path="/terms-and-conditions" element={<TermsPage />} />
+                <Route path="/refund-policy" element={<RefundPage />} />
+                <Route path="/shipping-policy" element={<ShippingPage />} />
                 
                 {/* User Routes */}
                 <Route path="/profile" element={
