@@ -1,12 +1,14 @@
-const express = require('express');
-const cors = require('cors');
-const Razorpay = require('razorpay');
-const crypto = require('crypto');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import Razorpay from 'razorpay';
+import crypto from 'crypto';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 
-// Allow requests from frontend (adjust origin as needed)
+// Allow requests from frontend
 app.use(cors({
   origin: '*', 
   methods: ['GET', 'POST']
@@ -15,7 +17,7 @@ app.use(cors({
 app.use(express.json());
 
 // Razorpay Instance
-// Note: In production, strictly use Environment Variables for keys
+// Note: Vercel Environment Variables are recommended for keys in production
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID || 'rzp_live_S1PWro2UcHnr2w',
   key_secret: process.env.RAZORPAY_KEY_SECRET || 'uvIr45WZeumzCmzZh7aV9rHX',
@@ -76,5 +78,5 @@ app.post('/api/razorpay/verify-payment', (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Mudichur Mart Server running on port ${PORT}`));
+// Export the app for Vercel Serverless
+export default app;

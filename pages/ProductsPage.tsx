@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Search, Filter, ShoppingCart, Plus, Tag } from 'lucide-react';
@@ -19,8 +18,17 @@ const ProductsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { addToCart } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
   const [filteredProducts, setFilteredProducts] = useState(MOCK_PRODUCTS);
+
+  // Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
   useEffect(() => {
     let result = MOCK_PRODUCTS;
@@ -29,12 +37,12 @@ const ProductsPage: React.FC = () => {
       result = result.filter(p => p.categoryId === selectedCategory);
     }
     
-    if (searchQuery) {
-      result = result.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    if (debouncedSearchQuery) {
+      result = result.filter(p => p.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()));
     }
     
     setFilteredProducts(result);
-  }, [searchQuery, selectedCategory]);
+  }, [debouncedSearchQuery, selectedCategory]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">

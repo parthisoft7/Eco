@@ -1,21 +1,26 @@
-
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
-// These would normally be in .env files.
-// For the purpose of this demo, we assume the environment provides them.
+/**
+ * Firebase configuration for Mudichur Mart.
+ * Exact credentials provided by the user for project 'eccommercerazorpay'.
+ */
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "mudichur-mart.firebaseapp.com",
-  projectId: "mudichur-mart",
-  storageBucket: "mudichur-mart.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef"
+  apiKey: "AIzaSyAfX15clZrCSLE4xp_Up1aVxni8L5pC4K8",
+  authDomain: "eccommercerazorpay.firebaseapp.com",
+  projectId: "eccommercerazorpay",
+  storageBucket: "eccommercerazorpay.firebasestorage.app",
+  messagingSenderId: "258455309946",
+  appId: "1:258455309946:web:34a365390556518b9f75c3",
+  measurementId: "G-4SGREDLQN4"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// Initialize core services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search, Download, Eye, CheckCircle, Clock, XCircle, ChevronDown } from 'lucide-react';
 import { OrderStatus } from '../../types';
@@ -11,6 +10,7 @@ const MOCK_ORDERS = [
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState(MOCK_ORDERS);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const getStatusColor = (status: OrderStatus) => {
     switch (status) {
@@ -20,6 +20,10 @@ const AdminOrders = () => {
       case OrderStatus.CANCELLED: return 'bg-rose-100 text-rose-700';
       default: return 'bg-gray-100 text-gray-700';
     }
+  };
+
+  const updateStatus = (orderId: string, newStatus: OrderStatus) => {
+    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
   };
 
   const exportToCSV = () => {
@@ -36,6 +40,11 @@ const AdminOrders = () => {
     document.body.appendChild(link);
     link.click();
   };
+
+  const filteredOrders = orders.filter(o => 
+    o.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    o.customer.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -60,17 +69,9 @@ const AdminOrders = () => {
               type="text" 
               placeholder="Filter by Order ID or Customer..." 
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
-          </div>
-          <div className="flex gap-2">
-            {Object.values(OrderStatus).map(status => (
-              <button 
-                key={status}
-                className="px-4 py-2 text-xs font-bold border rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                {status}
-              </button>
-            ))}
           </div>
         </div>
 
@@ -87,7 +88,7 @@ const AdminOrders = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {orders.map((order) => (
+            {filteredOrders.map((order) => (
               <tr key={order.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 font-bold text-gray-900">{order.id}</td>
                 <td className="px-6 py-4 font-medium">{order.customer}</td>
@@ -98,9 +99,13 @@ const AdminOrders = () => {
                     <button className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-2 ${getStatusColor(order.status)}`}>
                       {order.status} <ChevronDown size={14} />
                     </button>
-                    <div className="hidden group-hover:block absolute left-0 z-10 w-40 mt-1 bg-white border rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2">
+                    <div className="hidden group-hover:block absolute left-0 z-10 w-40 mt-1 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2">
                       {Object.values(OrderStatus).map(s => (
-                        <button key={s} className="w-full text-left px-4 py-2 text-xs hover:bg-gray-50 font-medium">
+                        <button 
+                          key={s} 
+                          onClick={() => updateStatus(order.id, s)}
+                          className="w-full text-left px-4 py-2 text-xs hover:bg-emerald-50 hover:text-emerald-700 font-medium transition-colors"
+                        >
                           Mark as {s}
                         </button>
                       ))}
@@ -115,6 +120,11 @@ const AdminOrders = () => {
                 </td>
               </tr>
             ))}
+            {filteredOrders.length === 0 && (
+              <tr>
+                <td colSpan={7} className="px-6 py-10 text-center text-gray-500">No matching orders found.</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

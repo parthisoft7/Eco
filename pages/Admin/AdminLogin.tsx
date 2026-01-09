@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase';
-import { Lock, Mail, AlertCircle, ArrowRight } from 'lucide-react';
+import { Lock, Mail, AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -21,8 +20,15 @@ const AdminLogin: React.FC = () => {
       await signInWithEmailAndPassword(auth, email, password);
       navigate('/admin');
     } catch (err: any) {
-      setError('Invalid credentials or unauthorized access.');
-      console.error(err);
+      console.error("Admin Login Error:", err);
+      // Firebase v10+ uses 'auth/invalid-credential' for generic login failures
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        setError('Invalid admin credentials. Access denied.');
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('Too many attempts. Please wait before trying again.');
+      } else {
+        setError('Authentication failed. Please check your network connection.');
+      }
     } finally {
       setLoading(false);
     }
@@ -38,15 +44,15 @@ const AdminLogin: React.FC = () => {
 
         <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
           {error && (
-            <div className="mb-6 p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-700 flex items-center">
-              <AlertCircle size={20} className="mr-2" />
+            <div className="mb-6 p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-700 flex items-center rounded-r-lg animate-in slide-in-from-top-1">
+              <AlertCircle size={20} className="mr-2 shrink-0" />
               <span className="text-sm font-medium">{error}</span>
             </div>
           )}
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
+              <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">Admin Email</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input 
@@ -54,14 +60,14 @@ const AdminLogin: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all bg-gray-50 focus:bg-white"
                   placeholder="admin@mudichurmart.com"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Password</label>
+              <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input 
@@ -69,7 +75,7 @@ const AdminLogin: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all bg-gray-50 focus:bg-white"
                   placeholder="••••••••"
                 />
               </div>
@@ -78,11 +84,11 @@ const AdminLogin: React.FC = () => {
             <button 
               type="submit" 
               disabled={loading}
-              className="w-full py-4 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-all flex items-center justify-center space-x-2 disabled:bg-gray-400"
+              className="w-full py-4 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-all flex items-center justify-center space-x-2 disabled:bg-gray-400 shadow-lg shadow-gray-200"
             >
-              {loading ? <span>Verifying...</span> : (
+              {loading ? <Loader2 className="animate-spin" size={22} /> : (
                 <>
-                  <span>Sign In</span>
+                  <span>Verify Identity</span>
                   <ArrowRight size={20} />
                 </>
               )}
