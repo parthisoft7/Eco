@@ -1,20 +1,45 @@
-import React, { useState } from 'react';
-import { Search, User, Mail, Calendar, MoreVertical, Shield } from 'lucide-react';
 
-const MOCK_USERS = [
-  { id: '1', name: 'Ramesh Kumar', email: 'ramesh@example.com', joined: '2024-01-12', role: 'customer', orders: 5 },
-  { id: '2', name: 'Priya S.', email: 'priya.s@gmail.com', joined: '2024-02-05', role: 'customer', orders: 2 },
-  { id: '3', name: 'Admin User', email: 'admin@mudichurmart.com', joined: '2023-11-20', role: 'admin', orders: 0 },
-  { id: '4', name: 'Suresh Raina', email: 'suresh.r@outlook.com', joined: '2024-03-01', role: 'customer', orders: 1 },
-];
+import React, { useState, useEffect } from 'react';
+import { Search, User, Mail, Calendar, MoreVertical, Shield, Loader2 } from 'lucide-react';
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { db } from '../../firebase';
+
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  createdAt: number;
+}
 
 const AdminUsers = () => {
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredUsers = MOCK_USERS.filter(u => 
-    u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    u.email.toLowerCase().includes(searchTerm.toLowerCase())
+  useEffect(() => {
+    const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedUsers = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as UserData));
+      setUsers(fetchedUsers);
+      setLoading(false);
+    }, (error) => {
+      console.error("Error fetching users:", error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const filteredUsers = users.filter(u => 
+    (u.name && u.name.toLowerCase().includes(searchTerm.toLowerCase())) || 
+    (u.email && u.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  if (loading) return <div className="p-20 flex justify-center"><Loader2 className="animate-spin text-emerald-600" size={40} /></div>;
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -45,7 +70,6 @@ const AdminUsers = () => {
               <th className="px-6 py-4">User</th>
               <th className="px-6 py-4">Role</th>
               <th className="px-6 py-4">Joined Date</th>
-              <th className="px-6 py-4">Orders</th>
               <th className="px-6 py-4 text-right">Actions</th>
             </tr>
           </thead>
@@ -54,11 +78,11 @@ const AdminUsers = () => {
               <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4">
                   <div className="flex items-center space-x-3">
-                    <div className="h-10 w-10 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold">
-                      {user.name.charAt(0)}
+                    <div className="h-10 w-10 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold uppercase">
+                      {user.name ? user.name.charAt(0) : <User size={18} />}
                     </div>
                     <div>
-                      <p className="font-bold text-gray-900">{user.name}</p>
+                      <p className="font-bold text-gray-900">{user.name || 'Unknown'}</p>
                       <p className="text-xs text-gray-500">{user.email}</p>
                     </div>
                   </div>
@@ -67,16 +91,15 @@ const AdminUsers = () => {
                   <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                     user.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'
                   }`}>
-                    {user.role}
+                    {user.role || 'customer'}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-500">
                   <div className="flex items-center">
                     <Calendar size={14} className="mr-2" />
-                    {user.joined}
+                    {new Date(user.createdAt).toLocaleDateString()}
                   </div>
                 </td>
-                <td className="px-6 py-4 font-bold text-gray-900">{user.orders}</td>
                 <td className="px-6 py-4 text-right">
                   <button className="p-2 text-gray-400 hover:text-gray-900">
                     <MoreVertical size={18} />
@@ -84,6 +107,11 @@ const AdminUsers = () => {
                 </td>
               </tr>
             ))}
+            {filteredUsers.length === 0 && (
+              <tr>
+                 <td colSpan={4} className="px-6 py-10 text-center text-gray-500">No users found.</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -46,7 +47,7 @@ import { signOut } from 'firebase/auth';
 
 const Navbar = () => {
   const { cartItems } = useCart();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
   const location = useLocation();
@@ -108,10 +109,12 @@ const Navbar = () => {
                       <UserIcon size={16} />
                       <span>My Profile</span>
                     </Link>
-                    <Link to="/admin" onClick={() => setIsUserMenuOpen(false)} className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors">
-                      <Settings size={16} />
-                      <span>Admin Dashboard</span>
-                    </Link>
+                    {isAdmin && (
+                      <Link to="/admin" onClick={() => setIsUserMenuOpen(false)} className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors">
+                        <Settings size={16} />
+                        <span>Admin Dashboard</span>
+                      </Link>
+                    )}
                     <button 
                       onClick={handleLogout}
                       className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 transition-colors text-left"
@@ -208,10 +211,13 @@ const Footer = () => {
 };
 
 const ProtectedAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
   
-  if (loading) return <div className="h-screen flex items-center justify-center">Loading...</div>;
-  if (!user) return <Navigate to="/admin/login" />;
+  if (loading) return <div className="h-screen flex items-center justify-center bg-gray-50"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div></div>;
+  
+  if (!user || !isAdmin) {
+    return <Navigate to="/admin/login" />;
+  }
   
   return <>{children}</>;
 };
@@ -219,7 +225,7 @@ const ProtectedAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children
 const ProtectedUserRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
   
-  if (loading) return <div className="h-screen flex items-center justify-center">Loading...</div>;
+  if (loading) return <div className="h-screen flex items-center justify-center bg-gray-50"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div></div>;
   if (!user) return <Navigate to="/login" />;
   
   return <>{children}</>;

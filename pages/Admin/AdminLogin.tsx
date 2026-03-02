@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -18,12 +19,14 @@ const AdminLogin: React.FC = () => {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      // Navigation happens automatically via AuthContext/ProtectedAdminRoute logic
+      // But we call navigate to be safe/direct
       navigate('/admin');
     } catch (err: any) {
       console.error("Admin Login Error:", err);
       // Firebase v10+ uses 'auth/invalid-credential' for generic login failures
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-        setError('Invalid admin credentials. Access denied.');
+        setError('Incorrect email or password.');
       } else if (err.code === 'auth/too-many-requests') {
         setError('Too many attempts. Please wait before trying again.');
       } else {

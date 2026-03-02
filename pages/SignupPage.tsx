@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
@@ -37,15 +38,19 @@ const SignupPage: React.FC = () => {
 
       // Save to Firestore
       try {
+        // Automatically set role to 'admin' if the email matches the owner's email
+        const role = formData.email === 'parthisoft7@gmail.com' ? 'admin' : 'customer';
+
         await setDoc(doc(db, 'users', user.uid), {
           name: formData.name,
           email: formData.email,
           createdAt: Date.now(),
-          role: 'customer'
+          role: role
         });
       } catch (fsErr: any) {
         console.warn("User Profile Creation Error (Firestore):", fsErr);
-        // We log the permission error but allow the user to continue if Auth succeeded.
+        // We log the warning but allow the user to continue if Auth succeeded.
+        // The AuthContext will handle the missing profile gracefully.
       }
 
       navigate('/profile');
